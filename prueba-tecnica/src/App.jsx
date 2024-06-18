@@ -1,39 +1,34 @@
 import { useEffect, useState } from "react";
 import './App.css'
+import { getRandomFact } from "./services/facts";
+import { useCatImage } from "./hooks/useCatImage";
 
-const CAT_ENDPOINT_RANDOM_FACT = "https://catfact.ninja/fact";
 const CAT_IMAGE_PREFIX = 'https://cataas.com'
 
-export function App() {
+const useCatFact = () => {
   const [fact, setFact] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
 
-  useEffect(() => {
-    fetch(CAT_ENDPOINT_RANDOM_FACT)
-      .then(res => res.json())
-      .then(data => {
-        const { fact } = data;
-        setFact(fact);
-      });
-  }, []); //No olvidar dependencias
+  const refreshFact = () => {
+    getRandomFact().then(newFact => setFact(newFact))
+  }
 
-  useEffect(() => {
-    if (!fact) return; //Si no hay fact, no hacer nada
-    const firstWord = fact.split(' ', 3).join(' ') //(mdn) separar por espacios para encontrar la primer palabra
-    console.log(firstWord)
+  useEffect(refreshFact, []); //No olvidar dependencias
 
-          fetch(`https://cataas.com/cat/says/${firstWord}?fontSize=50&fontColor=red&json=true`)
-            .then(resp => resp.json())
-            .then(response => {
-              const { url } = response
-              console.log(url)
-              setImageUrl(url);
-            });
-  }, [fact])
+  return {fact, refreshFact}
+}
+
+export function App() {
+  const { fact, refreshFact } = useCatFact()
+  const { imageUrl } = useCatImage({fact})
+
+  const handleClick = async() => {
+    refreshFact()
+  }
 
   return (
     <main>
       <h1>App</h1>
+      <button onClick={handleClick}>Get a new fact</button>
       {fact && <p>{fact}</p>}
       {imageUrl &&
         <img src={`${CAT_IMAGE_PREFIX}${imageUrl}`} alt={`Image using the first word of ${fact}`} />
