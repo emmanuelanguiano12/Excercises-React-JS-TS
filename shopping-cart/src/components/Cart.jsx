@@ -1,9 +1,31 @@
 import './Carts.css'
 import { useId } from 'react'
 import { ClearCartIcon, RemoveFromCartIcon, CartIcon} from './Icons.jsx'
+import { useCart } from '../hooks/useCart.js'
+
+function CartItem({thumbnail, price, title, quantity, addToCart}){
+    return(
+        <li>
+            <img src={thumbnail} alt={title} />
+            <div>
+                <strong>{title}</strong> - ${price}
+            </div>
+
+            <footer>
+                <small>
+                    {quantity}
+                </small>
+                <button onClick={addToCart}>+</button>
+            </footer>
+        </li>
+    )
+    
+}
 
 export function Cart(){
     const cartCheckboxId = useId()
+
+    const {cart, clearCart, addToCart} = useCart()
 
     return(
         <>
@@ -14,21 +36,18 @@ export function Cart(){
 
             <aside className='cart'>
                 <ul>
-                    <li>
-                        <img src="https://www.telcel.com/medias/APPLEIPHONE132021PINKDUAL-515Wx515H.png?context=bWFzdGVyfGltYWdlc3wxMzg2NTF8aW1hZ2UvcG5nfGltYWdlcy9oYjkvaDdmLzg4OTc1MzMxMTY0NDYucG5nfDEyYzQzYjU3YWU5ODJhMzYxYmIxZTcxZTkyMTAzNGFkMWU2MTViYmQ2NTYwZDgxODJhODAzOTllMjBlY2JlNTQ" alt="iphone" />
-                        <div>
-                            <strong>Iphone</strong> - $10000
-                        </div>
-
-                        <footer>
-                            <small>
-                                Qty: 1
-                            </small>
-                        </footer>
-                    </li>
+                    {
+                        cart.map(product => (
+                            <CartItem 
+                                key={product.id}
+                                addToCart={() => addToCart(product)}
+                                {...product}
+                            />
+                        ))
+                    }
                 </ul>
 
-                <button>
+                <button onClick={clearCart}>
                     <ClearCartIcon/>
                 </button>
             </aside>
